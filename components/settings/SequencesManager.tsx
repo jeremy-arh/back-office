@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   useSequences,
   AutomationSequence,
@@ -814,17 +814,17 @@ function TemplatePreview({
     "{{company_name}}": "My Notary",
   };
 
-  const replaceVars = (text: string) => {
+  const replaceVars = useCallback((text: string) => {
     let result = text;
     for (const [key, val] of Object.entries(sampleVars)) {
       result = result.replaceAll(key, val);
     }
     return result;
-  };
+  }, []);
 
-  const previewSubject = useMemo(() => replaceVars(subject), [subject]);
-  const previewHtml = useMemo(() => replaceVars(htmlBody), [htmlBody]);
-  const previewSms = useMemo(() => replaceVars(smsBody), [smsBody]);
+  const previewSubject = useMemo(() => replaceVars(subject), [subject, replaceVars]);
+  const previewHtml = useMemo(() => replaceVars(htmlBody), [htmlBody, replaceVars]);
+  const previewSms = useMemo(() => replaceVars(smsBody), [smsBody, replaceVars]);
 
   if (channel === "email") {
     if (!htmlBody && !subject) {
