@@ -189,30 +189,34 @@ export async function GET(
     }
 
     if (orderItems.length === 0) {
-      const servicesData = (servicesJunctionRes.data as { id: string; services: { name: string; base_price: number; service_id: string } | null }[]) || [];
-      const optionsData = (optionsJunctionRes.data as { id: string; options: { name: string; additional_price: number; option_id: string } | null }[]) || [];
+      type ServiceRow = { name: string; base_price: number; service_id: string };
+      type OptionRow = { name: string; additional_price: number; option_id: string };
+      const servicesData = (servicesJunctionRes.data as unknown as { id: string; services: ServiceRow | ServiceRow[] | null }[]) || [];
+      const optionsData = (optionsJunctionRes.data as unknown as { id: string; options: OptionRow | OptionRow[] | null }[]) || [];
       for (const ss of servicesData) {
-        if (ss.services) {
-          const sid = ss.services.service_id;
+        const svc = Array.isArray(ss.services) ? ss.services[0] : ss.services;
+        if (svc) {
+          const sid = svc.service_id;
           orderItems.push({
             id: ss.id,
             type: "service",
-            name: ss.services.name,
+            name: svc.name,
             ref: sid?.toUpperCase() || "",
-            price: Number(ss.services.base_price) || 0,
+            price: Number(svc.base_price) || 0,
             quantity: 1,
             serviceId: sid,
           });
         }
       }
       for (const so of optionsData) {
-        if (so.options) {
+        const opt = Array.isArray(so.options) ? so.options[0] : so.options;
+        if (opt) {
           orderItems.push({
             id: so.id,
             type: "option",
-            name: so.options.name,
-            ref: so.options.option_id?.toUpperCase() || "",
-            price: Number(so.options.additional_price) || 0,
+            name: opt.name,
+            ref: opt.option_id?.toUpperCase() || "",
+            price: Number(opt.additional_price) || 0,
             quantity: 1,
           });
         }
