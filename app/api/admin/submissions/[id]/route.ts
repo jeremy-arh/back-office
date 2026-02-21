@@ -226,7 +226,7 @@ export async function GET(
     const filesFromDb = (filesRes.data as { id: string; file_name: string; file_url: string; storage_path?: string }[]) || [];
 
     const BUCKETS = ["form-documents", "submission-documents", "notary-documents"];
-    async function getSignedUrl(storagePath: string): Promise<string | null> {
+    const getSignedUrl = async (storagePath: string): Promise<string | null> => {
       for (const bucket of BUCKETS) {
         try {
           const { data, error } = await supabase.storage
@@ -238,7 +238,7 @@ export async function GET(
         }
       }
       return null;
-    }
+    };
 
     const docsByName = new Map<string, { file_url: string; storage_path?: string }>();
     for (const f of filesFromDb) {
